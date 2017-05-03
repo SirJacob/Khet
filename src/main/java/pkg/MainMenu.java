@@ -8,15 +8,31 @@ import javax.swing.JButton;
  */
 public class MainMenu extends javax.swing.JFrame {
 
+    private static final int CUSTOM_WIDTH = 600;
+    private static final int CUSTOM_HEIGHT = 382;
+
     /**
      * Creates new form NewJFrame
      */
     public MainMenu() {
         initComponents();
+        setSize(CUSTOM_WIDTH, CUSTOM_HEIGHT);
+        lblBackground.setSize(CUSTOM_WIDTH, CUSTOM_HEIGHT);
+        
+        lblBackground.setLocation(0, 0);
+        setLocationRelativeTo(null);
+
         makeTransparentBtn(btnClassic);
+        btnClassic.setBounds(0, 0, CUSTOM_WIDTH, 90);
+
         makeTransparentBtn(btnImhotep);
+        btnImhotep.setBounds(0, 90, CUSTOM_WIDTH, 90);
+
         makeTransparentBtn(btnDynasty);
+        btnDynasty.setBounds(0, 180, CUSTOM_WIDTH, 90);
+
         makeTransparentBtn(btnQuit);
+        btnQuit.setBounds(0, CUSTOM_HEIGHT-90, CUSTOM_WIDTH, 90);
     }
 
     private static void makeTransparentBtn(JButton jButton) {
@@ -47,6 +63,8 @@ public class MainMenu extends javax.swing.JFrame {
         lblBackground = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setAlwaysOnTop(true);
+        setUndecorated(true);
         getContentPane().setLayout(null);
 
         btnClassic.setFont(new java.awt.Font("Maiandra GD", 1, 24)); // NOI18N
