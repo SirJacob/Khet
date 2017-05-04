@@ -1,8 +1,12 @@
 package pkg;
 
+import java.awt.Image;
+import java.io.File;
+import javax.swing.ImageIcon;
+
 /**
  *
- * @author Me
+ * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
 public class Piece {
 
@@ -23,10 +27,13 @@ public class Piece {
     static final int SPHINX = 3;
     static final int SCARAB = 4;
 
+     final Image image;
+
     public Piece(int type, boolean color, int rotation) {
         this.TYPE = type;
         this.COLOR = color;
         this.rotation = rotation;
+        this.image = new ImageIcon(this.getClass().getResource(String.format("/pieces/%s_%s.png", getColor().toLowerCase(), getPieceName().toLowerCase()))).getImage();
     }
 
     void turnLeft() {
@@ -47,6 +54,30 @@ public class Piece {
 
     int getRotation() {
         return rotation;
+    }
+
+    String getColor() {
+        if (COLOR) {
+            return "Silver";
+        } else {
+            return "Red";
+        }
+    }
+
+    String getPieceName() {
+        switch (TYPE) {
+            case 0:
+                return "Pyramid";
+            case 1:
+                return "Pharaoh";
+            case 2:
+                return "Anubis";
+            case 3:
+                return "Sphinx";
+            case 4:
+                return "Scarab";
+        }
+        return null;
     }
 
 }

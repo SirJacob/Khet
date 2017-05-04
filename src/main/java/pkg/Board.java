@@ -1,5 +1,7 @@
 package pkg;
 
+import java.awt.Graphics;
+import javax.swing.JPanel;
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
 import static pkg.Piece.NORTH;
 import static pkg.Piece.EAST;
@@ -18,11 +20,11 @@ import static pkg.Piece.SCARAB;
 
 /**
  *
- * @author Me
+ * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
 public class Board extends javax.swing.JFrame {
 
-    static Piece[][] board = new Piece[8][10];
+    private Piece[][] board = new Piece[8][10];
     //<editor-fold defaultstate="collapsed" desc="Default Board Setups">
     static final Piece[][] CLASSIC = {
         {new Piece(SPHINX, RED, SOUTH), null, null, null, new Piece(ANUBIS, RED, SOUTH), new Piece(PHARAOH, RED, SOUTH), new Piece(ANUBIS, RED, SOUTH), new Piece(PYRAMID, RED, EAST), null, null},
@@ -61,6 +63,26 @@ public class Board extends javax.swing.JFrame {
      */
     public Board() {
         initComponents();
+        setSize(8 * 50, 10 * 50);
+        setLocationRelativeTo(null);
+        JPanel jPanel = (JPanel) getContentPane();
+        jPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                for (int r = 0; r < board[r].length; r++) {
+                    for (int c = 0; c < board.length; c++) {
+                        if (board[r][c] != null) {
+                            g.drawImage(board[r][c].image, r * 50, c * 50, 50, 50, null);
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    void setBoard(Piece[][] board) {
+        this.board = board;
     }
 
     /**

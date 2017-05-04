@@ -1,12 +1,13 @@
 package pkg;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 
 /**
  *
- * @author Me
+ * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
-public class MainMenu extends javax.swing.JFrame {
+public class MainMenu extends JFrame {
 
     private static final int CUSTOM_WIDTH = 600;
     private static final int CUSTOM_HEIGHT = 382;
@@ -18,7 +19,7 @@ public class MainMenu extends javax.swing.JFrame {
         initComponents();
         setSize(CUSTOM_WIDTH, CUSTOM_HEIGHT);
         lblBackground.setSize(CUSTOM_WIDTH, CUSTOM_HEIGHT);
-        
+
         lblBackground.setLocation(0, 0);
         setLocationRelativeTo(null);
 
@@ -32,7 +33,7 @@ public class MainMenu extends javax.swing.JFrame {
         btnDynasty.setBounds(0, 180, CUSTOM_WIDTH, 90);
 
         makeTransparentBtn(btnQuit);
-        btnQuit.setBounds(0, CUSTOM_HEIGHT-90, CUSTOM_WIDTH, 90);
+        btnQuit.setBounds(0, CUSTOM_HEIGHT - 90, CUSTOM_WIDTH, 90);
     }
 
     private static void makeTransparentBtn(JButton jButton) {
@@ -42,8 +43,9 @@ public class MainMenu extends javax.swing.JFrame {
     }
 
     private void setup(Piece[][] selectedBoard) {
-        Board.board = selectedBoard;
-        new Board().setVisible(true);
+        Board board = new Board();
+        board.setVisible(true);
+        board.setBoard(selectedBoard);
         dispose();
     }
 
