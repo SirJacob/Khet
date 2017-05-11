@@ -26,13 +26,13 @@ public class Piece {
     static final int SPHINX = 3;
     static final int SCARAB = 4;
 
-     final Image image;
+    final Image image;
 
     public Piece(int type, boolean color, int rotation) {
         this.TYPE = type;
         this.COLOR = color;
         this.rotation = rotation;
-        this.image = new ImageIcon(this.getClass().getResource(String.format("/pieces/%s_%s.png", getColor().toLowerCase(), getPieceName().toLowerCase()))).getImage();
+        this.image = new ImageIcon(this.getClass().getResource(String.format("/%s_%s.png", getColor().toLowerCase(), getPieceName().toLowerCase()))).getImage();
     }
 
     void turnLeft() {
