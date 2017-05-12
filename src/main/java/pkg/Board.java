@@ -1,6 +1,12 @@
 package pkg;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
 import static pkg.Piece.NORTH;
@@ -24,7 +30,8 @@ import static pkg.Piece.SCARAB;
  */
 public class Board extends javax.swing.JFrame {
 
-    private Piece[][] board = new Piece[8][10];
+    private Image background = new ImageIcon(this.getClass().getResource("/board.png")).getImage();
+    private Piece[][] board;
     //<editor-fold defaultstate="collapsed" desc="Default Board Setups">
     static final Piece[][] CLASSIC = {
         {new Piece(SPHINX, RED, SOUTH), null, null, null, new Piece(ANUBIS, RED, SOUTH), new Piece(PHARAOH, RED, SOUTH), new Piece(ANUBIS, RED, SOUTH), new Piece(PYRAMID, RED, EAST), null, null},
@@ -63,22 +70,33 @@ public class Board extends javax.swing.JFrame {
      */
     public Board() {
         initComponents();
-        setSize(8 * 50, 10 * 50);
+        setSize(background.getWidth(null), background.getHeight(null));
         setLocationRelativeTo(null);
-        JPanel jPanel = (JPanel) getContentPane();
-        jPanel = new JPanel() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                for (int r = 0; r < board[r].length; r++) {
-                    for (int c = 0; c < board.length; c++) {
-                        if (board[r][c] != null) {
-                            g.drawImage(board[r][c].image, r * 50, c * 50, 50, 50, null);
-                        }
+            public void run() {
+                paintComponent(getContentPane().getGraphics());
+            }
+        }, 500, 100);
+    }
+
+    protected void paintComponent(Graphics g) {
+        g.drawImage(background, 0, 0, null);
+        Graphics2D g2d = (Graphics2D) g;
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 10; c++) {
+                if (board[r][c] != null) {
+                    if (board[r][c].getDegreeRotation() != 0) {
+                        g2d.translate(board[r][c].getDegreeRotation(), 0);
+                        g2d.rotate(1);
+                        g2d.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
+                    } else {
+                        g.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
                     }
                 }
             }
-        };
+        }
     }
 
     void setBoard(Piece[][] board) {
@@ -95,6 +113,7 @@ public class Board extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

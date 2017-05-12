@@ -78,5 +78,19 @@ public class Piece {
         }
         return null;
     }
+    
+    int getDegreeRotation(){
+         switch (getRotation()) {
+            case NORTH:
+                return 0;
+            case EAST:
+                return 90;
+            case SOUTH:
+                return 180;
+            case WEST:
+                return 270;
+        }
+        return 0;
+    }
 
 }
