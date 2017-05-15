@@ -80,3 +80,17 @@ public class Piece {
     }
 
 }
+//Unused method
+/*    int getDegreeRotation() {
+    switch (getRotation()) {
+    case NORTH:
+    return 0;
+    case EAST:
+    return 90;
+    case SOUTH:
+    return 180;
+    case WEST:
+    return 270;
+    }
+    return 0;
+    }*/

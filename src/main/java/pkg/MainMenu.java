@@ -43,10 +43,10 @@ public class MainMenu extends JFrame {
     }
 
     private void setup(Piece[][] selectedBoard) {
+        setVisible(false);
         Board board = new Board();
         board.setVisible(true);
         board.setBoard(selectedBoard);
-        dispose();
     }
 
     /**
