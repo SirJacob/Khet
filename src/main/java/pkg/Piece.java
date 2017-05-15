@@ -78,9 +78,9 @@ public class Piece {
         }
         return null;
     }
-    
-    int getDegreeRotation(){
-         switch (getRotation()) {
+
+    int getDegreeRotation() {
+        switch (getRotation()) {
             case NORTH:
                 return 0;
             case EAST:

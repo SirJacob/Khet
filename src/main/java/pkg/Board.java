@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.ImageIcon;
@@ -78,25 +79,47 @@ public class Board extends javax.swing.JFrame {
             public void run() {
                 paintComponent(getContentPane().getGraphics());
             }
-        }, 500, 100);
+        }, 500, 1000);
     }
 
     protected void paintComponent(Graphics g) {
         g.drawImage(background, 0, 0, null);
-        Graphics2D g2d = (Graphics2D) g;
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 10; c++) {
                 if (board[r][c] != null) {
                     if (board[r][c].getDegreeRotation() != 0) {
-                        g2d.translate(board[r][c].getDegreeRotation(), 0);
-                        g2d.rotate(1);
-                        g2d.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
+                        //g2d.translate(board[r][c].getDegreeRotation(), 0);
+                        //g2d.rotate(Math.toRadians(board[r][c].getDegreeRotation()));
+                        //g2d.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
+
+                        Graphics2D g2d = (Graphics2D) g;
+//                        AffineTransform identity = new AffineTransform();
+//                        AffineTransform trans = new AffineTransform();
+//                        trans.translate((c * 125)-c, r * 125);
+//                        trans.rotate(Math.atan2(125, 125));
+
+                        AffineTransformOp op = new AffineTransformOp(rotate(board[r][c].image, (c * 125) - c, r * 125), AffineTransformOp.TYPE_BILINEAR);
+                        g2d.drawImage(board[r][c].image, op.getTransform(), null);
                     } else {
                         g.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
                     }
                 }
             }
         }
+    }
+
+    // Rotates clockwise 90 degrees. Uses rotation on center and then translating it to origin
+    private AffineTransform rotate(Image source, int x, int y) {
+        AffineTransform transform = new AffineTransform();
+        transform.scale(.25, .25);
+        transform.translate(x * 4, y * 4);
+        transform.rotate(Math.PI * .25, source.getWidth(null) / 2, source.getHeight(null) / 2);
+        /*
+        Starts out EAST 90* (x2)
+        PI = West
+        /2 = South
+         */
+        return transform;
     }
 
     void setBoard(Piece[][] board) {
