@@ -8,7 +8,6 @@ import java.awt.image.AffineTransformOp;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
 import static pkg.Piece.NORTH;
 import static pkg.Piece.EAST;
@@ -31,7 +30,7 @@ import static pkg.Piece.SCARAB;
  */
 public class Board extends javax.swing.JFrame {
 
-    private Image background = new ImageIcon(this.getClass().getResource("/board.png")).getImage();
+    private final Image BACKGROUND = new ImageIcon(this.getClass().getResource("/board.png")).getImage();
     private Piece[][] board;
     //<editor-fold defaultstate="collapsed" desc="Default Board Setups">
     static final Piece[][] CLASSIC = {
@@ -71,7 +70,7 @@ public class Board extends javax.swing.JFrame {
      */
     public Board() {
         initComponents();
-        setSize(background.getWidth(null), background.getHeight(null));
+        setSize(BACKGROUND.getWidth(null), BACKGROUND.getHeight(null));
         setLocationRelativeTo(null);
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -83,22 +82,13 @@ public class Board extends javax.swing.JFrame {
     }
 
     protected void paintComponent(Graphics g) {
-        g.drawImage(background, 0, 0, null);
+        g.drawImage(BACKGROUND, 0, 0, null);
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 10; c++) {
                 if (board[r][c] != null) {
-                    if (board[r][c].getDegreeRotation() != 0) {
-                        //g2d.translate(board[r][c].getDegreeRotation(), 0);
-                        //g2d.rotate(Math.toRadians(board[r][c].getDegreeRotation()));
-                        //g2d.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
-
+                    if (board[r][c].getRotation() != EAST) {
                         Graphics2D g2d = (Graphics2D) g;
-//                        AffineTransform identity = new AffineTransform();
-//                        AffineTransform trans = new AffineTransform();
-//                        trans.translate((c * 125)-c, r * 125);
-//                        trans.rotate(Math.atan2(125, 125));
-
-                        AffineTransformOp op = new AffineTransformOp(rotate(board[r][c].image, (c * 125) - c, r * 125), AffineTransformOp.TYPE_BILINEAR);
+                        AffineTransformOp op = new AffineTransformOp(rotate(board[r][c].image, (c * 125) - c, r * 125, board[r][c].getRotation()), AffineTransformOp.TYPE_BILINEAR);
                         g2d.drawImage(board[r][c].image, op.getTransform(), null);
                     } else {
                         g.drawImage(board[r][c].image, (c * 125) - c, r * 125, 125, 125, null);
@@ -108,17 +98,25 @@ public class Board extends javax.swing.JFrame {
         }
     }
 
-    // Rotates clockwise 90 degrees. Uses rotation on center and then translating it to origin
-    private AffineTransform rotate(Image source, int x, int y) {
+    private AffineTransform rotate(Image source, int x, int y, int newDirection) {
         AffineTransform transform = new AffineTransform();
         transform.scale(.25, .25);
         transform.translate(x * 4, y * 4);
-        transform.rotate(Math.PI * .25, source.getWidth(null) / 2, source.getHeight(null) / 2);
-        /*
-        Starts out EAST 90* (x2)
-        PI = West
-        /2 = South
-         */
+
+        double theta = 0.0;
+        switch (newDirection) {
+            case NORTH:
+                theta = Math.PI + (Math.PI / 2);
+                break;
+            case SOUTH:
+                theta = Math.PI / 2;
+                break;
+            case WEST:
+                theta = Math.PI;
+                break;
+        }
+        transform.rotate(theta, source.getWidth(null) / 2, source.getHeight(null) / 2);
+
         return transform;
     }
 

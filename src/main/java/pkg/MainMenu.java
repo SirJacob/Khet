@@ -1,7 +1,5 @@
 package pkg;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
