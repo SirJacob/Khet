@@ -12,4 +12,30 @@
     </properties>
     <name>Khet</name>
     <description>A year end programming project created in collaboration of a Comp Sci AB student and two Intro to Comp Sci students.</description>
+    <developers>
+        <developer>
+            <name>SirJacob</name>
+            <url>https://github.com/SirJacob</url>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>America/New_York</timezone>
+        </developer>
+        <developer>
+            <name>evan4guitar</name>
+            <url>https://github.com/evan4guitar</url>
+            <roles>
+                <role>Assistant Developer</role>
+            </roles>
+            <timezone>America/New_York</timezone>
+        </developer>
+        <developer>
+            <name>clarkmollencop</name>
+            <url>https://github.com/clarkmollencop</url>
+            <roles>
+                <role>Asset Designer</role>
+            </roles>
+            <timezone>America/New_York</timezone>
+        </developer>
+    </developers>
 </project>
