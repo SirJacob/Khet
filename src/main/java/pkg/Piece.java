@@ -55,6 +55,10 @@ public class Piece {
         return rotation;
     }
 
+    boolean isRed() {
+        return getColor().equals("Red");
+    }
+
     String getColor() {
         if (COLOR) {
             return "Silver";
