@@ -93,7 +93,7 @@ public class Board extends javax.swing.JFrame {
                 }
             }
         }
-        if (isSelected()) {
+        if (isPieceSelected()) {
             g.setColor(Color.YELLOW);
             g2d.setStroke(new BasicStroke(5));
             g2d.drawRect((selectedPiece.y * 125) - selectedPiece.y + 2, (selectedPiece.x * 125) + 2, 120, 120);
@@ -107,8 +107,34 @@ public class Board extends javax.swing.JFrame {
         redraw();
     }
 
-    private boolean isSelected() {
+    private boolean isPieceSelected() {
         return selectedPiece.x >= 0 && selectedPiece.y >= 0;
+    }
+
+    private Piece getSelectedPiece() {
+        return isPieceSelected() ? board[selectedPiece.x][selectedPiece.y] : null;
+    }
+
+    private void movePiece(int r, int c) {
+        if (r >= 0 && r <= 7 && c >= 0 && c <= 9 //Check in bounds
+                && (board[r][c] == null || scarabCheck(r, c)) //Check if spot is empty or if the Scarab can switch
+                && getSelectedPiece().TYPE != SPHINX //Check if not SPHINX (unmoveable)
+                && ankhCheck(r, c)) //Check for Ankh or Eye of Horus squares
+        {
+            if (scarabCheck(r, c)) {
+                Piece temp = board[r][c];
+                board[r][c] = getSelectedPiece();
+                board[selectedPiece.x][selectedPiece.y] = temp;
+            } else {
+                board[r][c] = getSelectedPiece();
+                board[selectedPiece.x][selectedPiece.y] = null;
+            }
+            switchTurn();
+        }
+    }
+
+    private boolean scarabCheck(int r, int c) {
+        return board[r][c] == null || (getSelectedPiece().TYPE == SCARAB && (board[r][c].TYPE == PYRAMID || board[r][c].TYPE == ANUBIS));
     }
 
     /**
@@ -216,7 +242,7 @@ public class Board extends javax.swing.JFrame {
                         && x >= ((c - 1) * 125) - (c - 1)
                         && y <= r * 125
                         && y >= (r - 1) * 125) {
-                    System.out.println(String.format("Selected:\t board[%d][%d]", r - 1, c - 1));
+                    //System.out.println(String.format("Selected:\t board[%d][%d]", r - 1, c - 1));
                     //Rule #2
                     if (board[r - 1][c - 1] != null && board[r - 1][c - 1].isRed() == isRedTurn) {
                         selectedPiece.setLocation(r - 1, c - 1);
@@ -235,11 +261,11 @@ public class Board extends javax.swing.JFrame {
             dispose();
         }
         //Rule #4
-        if (isSelected()) {
+        if (isPieceSelected()) {
             int r = selectedPiece.x;
             int c = selectedPiece.y;
             switch (evt.getKeyCode()) {
-                case VK_Q:
+                case VK_LEFT:
                     //Rule #3
                     if ((board[r][c].TYPE == SPHINX && board[r][c].isRed() && board[r][c].getRotation() == EAST)
                             || (board[r][c].TYPE == SPHINX && !board[r][c].isRed() && board[r][c].getRotation() == WEST)) {
@@ -248,7 +274,7 @@ public class Board extends javax.swing.JFrame {
                     board[r][c].turnLeft();
                     switchTurn();
                     break;
-                case VK_E:
+                case VK_RIGHT:
                     //Rule #3
                     if ((board[r][c].TYPE == SPHINX && board[r][c].isRed() && board[r][c].getRotation() == SOUTH)
                             || (board[r][c].TYPE == SPHINX && !board[r][c].isRed() && board[r][c].getRotation() == NORTH)) {
@@ -258,41 +284,30 @@ public class Board extends javax.swing.JFrame {
                     switchTurn();
                     break;
                 //`board[r][c].TYPE != SPHINX` - Rule #3
-                case VK_W:
-                    if (board[r - 1][c] == null
-                            && ankhCheck(r - 1, c)
-                            && board[r][c].TYPE != SPHINX) {
-                        board[r - 1][c] = board[r][c];
-                        board[r][c] = null;
-                        switchTurn();
-                    }
+                case VK_W: //Up
+                    movePiece(r - 1, c);
                     break;
-                case VK_A:
-                    if (board[r][c - 1] == null
-                            && ankhCheck(r, c - 1)
-                            && board[r][c].TYPE != SPHINX) {
-                        board[r][c - 1] = board[r][c];
-                        board[r][c] = null;
-                        switchTurn();
-                    }
+                case VK_A: //Left
+                    movePiece(r, c - 1);
                     break;
-                case VK_S:
-                    if (board[r + 1][c] == null
-                            && ankhCheck(r + 1, c)
-                            && board[r][c].TYPE != SPHINX) {
-                        board[r + 1][c] = board[r][c];
-                        board[r][c] = null;
-                        switchTurn();
-                    }
+                case VK_X: //Down
+                    movePiece(r + 1, c);
                     break;
-                case VK_D:
-                    if (board[r][c + 1] == null
-                            && ankhCheck(r, c + 1)
-                            && board[r][c].TYPE != SPHINX) {
-                        board[r][c + 1] = board[r][c];
-                        board[r][c] = null;
-                        switchTurn();
-                    }
+                case VK_D: //Right
+                    movePiece(r, c + 1);
+                    break;
+                //Move Diagonally
+                case VK_Q: //Up, Left
+                    movePiece(r - 1, c - 1);
+                    break;
+                case VK_E: //Up, Right
+                    movePiece(r - 1, c + 1);
+                    break;
+                case VK_Z: //Down, Left
+                    movePiece(r + 1, c - 1);
+                    break;
+                case VK_C: //Down, Right
+                    movePiece(r + 1, c + 1);
                     break;
             }
         }
