@@ -7,7 +7,7 @@ import javax.swing.ImageIcon;
  *
  * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
-public class Piece {
+class Piece {
 
     private int rotation;
     static final int NORTH = 0;
@@ -28,7 +28,7 @@ public class Piece {
 
     final Image image;
 
-    public Piece(int type, boolean color, int rotation) {
+    Piece(int type, boolean color, int rotation) {
         this.TYPE = type;
         this.COLOR = color;
         this.rotation = rotation;
@@ -36,23 +36,55 @@ public class Piece {
     }
 
     void turnLeft() {
-        if (rotation == NORTH) {
-            rotation = WEST;
-        } else {
-            rotation--;
-        }
+        rotation = getLeft();
     }
 
     void turnRight() {
+        rotation = getRight();
+    }
+
+    int getLeft() {
+        if (rotation == NORTH) {
+            return WEST;
+        }
+        return rotation - 1;
+    }
+
+    int getRight() {
         if (rotation == WEST) {
-            rotation = NORTH;
-        } else {
-            rotation++;
+            return NORTH;
+        }
+        return rotation + 1;
+    }
+
+    int getBehind() {
+        switch (rotation) {
+            case NORTH:
+                return SOUTH;
+            case SOUTH:
+                return NORTH;
+            case WEST:
+                return EAST;
+            default:
+                return WEST;
         }
     }
 
     int getRotation() {
         return rotation;
+    }
+
+    String getRotationString() {
+        switch (rotation) {
+            case NORTH:
+                return "North";
+            case EAST:
+                return "East";
+            case SOUTH:
+                return "South";
+            default:
+                return "West";
+        }
     }
 
     boolean isRed() {
@@ -84,17 +116,3 @@ public class Piece {
     }
 
 }
-//Unused method
-/*    int getDegreeRotation() {
-    switch (getRotation()) {
-    case NORTH:
-    return 0;
-    case EAST:
-    return 90;
-    case SOUTH:
-    return 180;
-    case WEST:
-    return 270;
-    }
-    return 0;
-    }*/

@@ -7,7 +7,7 @@ import javax.swing.JFrame;
  *
  * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
-public class MainMenu extends JFrame {
+class MainMenu extends JFrame {
 
     private static final int CUSTOM_WIDTH = 600;
     private static final int CUSTOM_HEIGHT = 382;
@@ -43,10 +43,10 @@ public class MainMenu extends JFrame {
     }
 
     private void setup(Piece[][] selectedBoard) {
-        dispose();
         Board board = new Board();
         board.setVisible(true);
         board.setBoard(selectedBoard);
+        dispose();
     }
 
     /**
@@ -166,6 +166,7 @@ public class MainMenu extends JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new MainMenu().setVisible(true);
             }

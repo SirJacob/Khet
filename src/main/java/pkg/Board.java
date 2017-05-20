@@ -10,6 +10,7 @@ import static java.awt.event.KeyEvent.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
 import static pkg.Piece.NORTH;
 import static pkg.Piece.EAST;
@@ -30,10 +31,10 @@ import static pkg.Piece.SCARAB;
  *
  * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
-public class Board extends javax.swing.JFrame {
-
+class Board extends javax.swing.JFrame {
+    
     private boolean isRedTurn = false; //Rule #2
-    private Point selectedPiece = new Point(-1, -1);
+    private final Point selectedPiece = new Point(-1, -1);
     private final Image BACKGROUND = new ImageIcon(this.getClass().getResource("/board.png")).getImage();
     private Piece[][] board;
     //<editor-fold defaultstate="collapsed" desc="Default Board Setups">
@@ -67,6 +68,16 @@ public class Board extends javax.swing.JFrame {
         {null, null, null, null, new Piece(PHARAOH, SILVER, NORTH), null, null, null, null, null},
         {null, null, null, new Piece(PYRAMID, SILVER, WEST), new Piece(ANUBIS, SILVER, NORTH), new Piece(PYRAMID, SILVER, NORTH), null, null, null, new Piece(SPHINX, SILVER, NORTH)}
     };
+    static final Piece[][] DEBUG = {
+        {new Piece(PYRAMID, RED, NORTH), new Piece(PYRAMID, RED, EAST), new Piece(PYRAMID, RED, SOUTH), new Piece(PYRAMID, RED, WEST), null, null, null, null, null, null},
+        {new Piece(PHARAOH, RED, NORTH), new Piece(PHARAOH, RED, EAST), new Piece(PHARAOH, RED, SOUTH), new Piece(PHARAOH, RED, WEST), null, null, null, null, null, null},
+        {new Piece(ANUBIS, RED, NORTH), new Piece(ANUBIS, RED, EAST), new Piece(ANUBIS, RED, SOUTH), new Piece(ANUBIS, RED, WEST), null, null, null, null, null, null},
+        {new Piece(SPHINX, RED, NORTH), new Piece(SPHINX, RED, EAST), new Piece(SPHINX, RED, SOUTH), new Piece(SPHINX, RED, WEST), null, null, null, null, null, null},
+        {new Piece(SCARAB, RED, NORTH), new Piece(SCARAB, RED, EAST), new Piece(SCARAB, RED, SOUTH), new Piece(SCARAB, RED, WEST), null, null, null, null, null, null},
+        {null, null, null, null, null, null, null, null, null, null},
+        {null, null, null, null, null, null, null, null, null, null},
+        {null, null, null, null, null, null, null, null, null, null}
+    };
 //</editor-fold>
 
     /**
@@ -77,8 +88,8 @@ public class Board extends javax.swing.JFrame {
         setSize(BACKGROUND.getWidth(null), BACKGROUND.getHeight(null));
         setLocationRelativeTo(null);
     }
-
-    protected void paintComponent(Graphics g) {
+    
+    private void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g.drawImage(BACKGROUND, 0, 0, null);
         for (int r = 0; r < 8; r++) {
@@ -102,19 +113,97 @@ public class Board extends javax.swing.JFrame {
 
     //Rule #2
     private void switchTurn() {
+        if (isRedTurn) {
+            fireLazer(0, 0, board[0][0].getRotation());
+        } else {
+            fireLazer(7, 9, board[7][9].getRotation());
+        }
         isRedTurn = !isRedTurn;
         selectedPiece.setLocation(-1, -1);
         redraw();
     }
-
+    
+    private void endGame(boolean isRedLoser) {
+        JOptionPane.showMessageDialog(this, isRedLoser ? "Silver" : "Red" + " has killed the opponent's pharaoh and won!", "Khet - Game Over", JOptionPane.PLAIN_MESSAGE);
+        System.exit(0);
+    }
+    
+    private void fireLazer(final int sourceR, final int sourceC, final int fireDirection) {
+        switch (fireDirection) {
+            case NORTH:
+                fireLazerSearchY(sourceR, -1, sourceC);
+                break;
+            case SOUTH:
+                fireLazerSearchY(sourceR, 1, sourceC);
+                break;
+            case WEST:
+                fireLazerSearchX(sourceC, -1, sourceR);
+                break;
+            case EAST:
+                fireLazerSearchX(sourceC, 1, sourceR);
+                break;
+        }
+    }
+    
+    private void fireLazerSearchY(final int sourceR, final int direction, final int sourceC) {
+        for (int r = sourceR + direction; r >= 0 && r <= 7; r += direction) {
+            if (board[r][sourceC] != null) {
+                fireLazerCollide(sourceR, sourceC, r, sourceC, direction == 1 ? NORTH : SOUTH);
+                return;
+            }
+        }
+        System.out.println("The laser went out of bounds.");
+    }
+    
+    private void fireLazerSearchX(final int sourceC, final int direction, final int sourceR) {
+        for (int c = sourceC + direction; c >= 0 && c <= 9; c += direction) {
+            if (board[sourceR][c] != null) {
+                fireLazerCollide(sourceR, sourceC, sourceR, c, direction == 1 ? WEST : EAST);
+                return;
+            }
+        }
+        System.out.println("The laser went out of bounds.");
+    }
+    
+    private void fireLazerCollide(final int sourceR, final int sourceC, final int targetR, final int targetC, final int impact) {
+        Piece sourcePiece = board[sourceR][sourceC];
+        Piece targetPiece = board[targetR][targetC];
+        String debug = String.format("%s %s [%s,%s] looking %s hit %s %s [%s,%s] looking %s on the %s side",
+                sourcePiece.getColor(), sourcePiece.getPieceName(), sourceR, sourceC, sourcePiece.getRotationString(),
+                targetPiece.getColor(), targetPiece.getPieceName(), targetR, targetC, targetPiece.getRotationString(), impact);
+        System.out.println(debug);
+        
+        int fireDirection;
+        if (((targetPiece.TYPE == PYRAMID || targetPiece.TYPE == SCARAB) && impact == targetPiece.getRotation())) {
+            fireDirection = targetPiece.getRight();
+        } else if (((targetPiece.TYPE == PYRAMID || targetPiece.TYPE == SCARAB) && impact == targetPiece.getRight())) {
+            fireDirection = targetPiece.getRotation();
+        } else if (targetPiece.TYPE == SCARAB && impact == targetPiece.getBehind()) {
+            fireDirection = targetPiece.getLeft();
+        } else if (targetPiece.TYPE == SCARAB && impact == targetPiece.getLeft()) {
+            fireDirection = targetPiece.getBehind();
+        } else if ((targetPiece.TYPE == ANUBIS && impact == targetPiece.getRotation()) || targetPiece.TYPE == SPHINX) {
+            System.out.println(targetPiece.getPieceName() + " was hit by a laser and negated it.");
+            return;
+        } else if (targetPiece.TYPE == PHARAOH) {
+            endGame(targetPiece.isRed());
+            return;
+        } else {
+            System.out.println(targetPiece.getPieceName() + " was hit and removed from play. Hit from " + impact + " while facaing " + targetPiece.getRotationString() + ".");
+            board[targetR][targetC] = null;
+            return;
+        }
+        fireLazer(targetR, targetC, fireDirection);
+    }
+    
     private boolean isPieceSelected() {
         return selectedPiece.x >= 0 && selectedPiece.y >= 0;
     }
-
+    
     private Piece getSelectedPiece() {
         return isPieceSelected() ? board[selectedPiece.x][selectedPiece.y] : null;
     }
-
+    
     private void movePiece(int r, int c) {
         if (r >= 0 && r <= 7 && c >= 0 && c <= 9 //Check in bounds
                 && (board[r][c] == null || scarabCheck(r, c)) //Check if spot is empty or if the Scarab can switch
@@ -132,7 +221,7 @@ public class Board extends javax.swing.JFrame {
             switchTurn();
         }
     }
-
+    
     private boolean scarabCheck(int r, int c) {
         return board[r][c] == null || (getSelectedPiece().TYPE == SCARAB && (board[r][c].TYPE == PYRAMID || board[r][c].TYPE == ANUBIS));
     }
@@ -148,7 +237,7 @@ public class Board extends javax.swing.JFrame {
         int x = selectedPiece.x;
         int y = selectedPiece.y;
         boolean red = board[x][y].isRed();
-
+        
         if (!red && c == 0) {
             return false;
         } else if (red && c == 9) {
@@ -162,19 +251,19 @@ public class Board extends javax.swing.JFrame {
         } else if (!red && r == 7 && c == 8) {
             return false;
         }
-
+        
         return true;
     }
-
+    
     private void redraw() {
         paintComponent(getContentPane().getGraphics());
     }
-
+    
     private AffineTransform rotate(Image source, int x, int y, int newDirection) {
         AffineTransform transform = new AffineTransform();
         transform.scale(.25, .25);
         transform.translate(x * 4, y * 4);
-
+        
         double theta = 0.0;
         switch (newDirection) {
             case NORTH:
@@ -188,13 +277,18 @@ public class Board extends javax.swing.JFrame {
                 break;
         }
         transform.rotate(theta, source.getWidth(null) / 2, source.getHeight(null) / 2);
-
+        
         return transform;
     }
 
     //Rule #1
     void setBoard(Piece[][] board) {
         this.board = board;
+    }
+    
+    void returnToMainMenu() {
+        new MainMenu().setVisible(true);
+        dispose();
     }
 
     /**
@@ -211,6 +305,13 @@ public class Board extends javax.swing.JFrame {
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 formMouseReleased(evt);
+            }
+        });
+        addWindowFocusListener(new java.awt.event.WindowFocusListener() {
+            public void windowGainedFocus(java.awt.event.WindowEvent evt) {
+                formWindowGainedFocus(evt);
+            }
+            public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
         });
         addKeyListener(new java.awt.event.KeyAdapter() {
@@ -254,11 +355,10 @@ public class Board extends javax.swing.JFrame {
         }
         redraw();
     }//GEN-LAST:event_formMouseReleased
-
+    
     private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
         if (evt.getKeyCode() == VK_ESCAPE) {
-            new MainMenu().setVisible(true);
-            dispose();
+            returnToMainMenu();
         }
         //Rule #4
         if (isPieceSelected()) {
@@ -312,6 +412,10 @@ public class Board extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_formKeyReleased
+    
+    private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
+        redraw();
+    }//GEN-LAST:event_formWindowGainedFocus
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
