@@ -9,6 +9,8 @@ import java.awt.Point;
 import static java.awt.event.KeyEvent.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
@@ -32,7 +34,7 @@ import static pkg.Piece.SCARAB;
  * @author https://github.com/SirJacob/Khet/graphs/contributors
  */
 class Board extends javax.swing.JFrame {
-    
+
     private boolean isRedTurn = false; //Rule #2
     private final Point selectedPiece = new Point(-1, -1);
     private final Image BACKGROUND = new ImageIcon(this.getClass().getResource("/board.png")).getImage();
@@ -88,7 +90,7 @@ class Board extends javax.swing.JFrame {
         setSize(BACKGROUND.getWidth(null), BACKGROUND.getHeight(null));
         setLocationRelativeTo(null);
     }
-    
+
     private void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         g.drawImage(BACKGROUND, 0, 0, null);
@@ -104,6 +106,12 @@ class Board extends javax.swing.JFrame {
                 }
             }
         }
+        paintSelectedBorder();
+    }
+
+    private void paintSelectedBorder() {
+        Graphics g = getContentPane().getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
         if (isPieceSelected()) {
             g.setColor(Color.YELLOW);
             g2d.setStroke(new BasicStroke(5));
@@ -113,66 +121,79 @@ class Board extends javax.swing.JFrame {
 
     //Rule #2
     private void switchTurn() {
-        if (isRedTurn) {
-            fireLazer(0, 0, board[0][0].getRotation());
-        } else {
-            fireLazer(7, 9, board[7][9].getRotation());
-        }
-        isRedTurn = !isRedTurn;
         selectedPiece.setLocation(-1, -1);
         redraw();
+        if (isRedTurn) {
+            fireLaser(0, 0, board[0][0].getRotation());
+        } else {
+            fireLaser(7, 9, board[7][9].getRotation());
+        }
+        isRedTurn = !isRedTurn;
+        redraw();
     }
-    
+
     private void endGame(boolean isRedLoser) {
-        JOptionPane.showMessageDialog(this, isRedLoser ? "Silver" : "Red" + " has killed the opponent's pharaoh and won!", "Khet - Game Over", JOptionPane.PLAIN_MESSAGE);
+        JOptionPane.showMessageDialog(this, isRedLoser ? "Silver" : "Red" + " has won!", "Khet - Game Over", JOptionPane.PLAIN_MESSAGE);
         System.exit(0);
     }
-    
-    private void fireLazer(final int sourceR, final int sourceC, final int fireDirection) {
+
+    private void fireLaser(final int sourceR, final int sourceC, final int fireDirection) {
         switch (fireDirection) {
             case NORTH:
-                fireLazerSearchY(sourceR, -1, sourceC);
+                fireLaserSearchY(sourceR, -1, sourceC);
                 break;
             case SOUTH:
-                fireLazerSearchY(sourceR, 1, sourceC);
+                fireLaserSearchY(sourceR, 1, sourceC);
                 break;
             case WEST:
-                fireLazerSearchX(sourceC, -1, sourceR);
+                fireLaserSearchX(sourceC, -1, sourceR);
                 break;
             case EAST:
-                fireLazerSearchX(sourceC, 1, sourceR);
+                fireLaserSearchX(sourceC, 1, sourceR);
                 break;
         }
     }
-    
-    private void fireLazerSearchY(final int sourceR, final int direction, final int sourceC) {
+
+    private void fireLaserSearchY(final int sourceR, final int direction, final int sourceC) {
         for (int r = sourceR + direction; r >= 0 && r <= 7; r += direction) {
             if (board[r][sourceC] != null) {
-                fireLazerCollide(sourceR, sourceC, r, sourceC, direction == 1 ? NORTH : SOUTH);
+                fireLaserCollide(sourceR, sourceC, r, sourceC, direction == 1 ? NORTH : SOUTH);
                 return;
             }
         }
         System.out.println("The laser went out of bounds.");
+        if (direction != 1) {
+            drawLaser(sourceC * 125 + 60, sourceR * 125 + 60, sourceC * 125 + 60, 0);
+        } else {
+            drawLaser(sourceC * 125 + 60, sourceR * 125 + 60, sourceC * 125 + 60, getHeight());
+        }
     }
-    
-    private void fireLazerSearchX(final int sourceC, final int direction, final int sourceR) {
+
+    private void fireLaserSearchX(final int sourceC, final int direction, final int sourceR) {
         for (int c = sourceC + direction; c >= 0 && c <= 9; c += direction) {
             if (board[sourceR][c] != null) {
-                fireLazerCollide(sourceR, sourceC, sourceR, c, direction == 1 ? WEST : EAST);
+                fireLaserCollide(sourceR, sourceC, sourceR, c, direction == 1 ? WEST : EAST);
                 return;
             }
         }
         System.out.println("The laser went out of bounds.");
+        if (direction != 1) {
+            drawLaser(sourceC * 125 + 60, sourceR * 125 + 60, 0, sourceR * 125 + 60);
+        } else {
+            drawLaser(sourceC * 125 + 60, sourceR * 125 + 60, getWidth(), sourceR * 125 + 60);
+        }
     }
-    
-    private void fireLazerCollide(final int sourceR, final int sourceC, final int targetR, final int targetC, final int impact) {
+
+    private void fireLaserCollide(final int sourceR, final int sourceC, final int targetR, final int targetC, final int impact) {
         Piece sourcePiece = board[sourceR][sourceC];
         Piece targetPiece = board[targetR][targetC];
-        String debug = String.format("%s %s [%s,%s] looking %s hit %s %s [%s,%s] looking %s on the %s side",
+        String debug = String.format("%s %s [%s,%s] looking %s hit %s %s [%s,%s] looking %s. Impact from the %s side.",
                 sourcePiece.getColor(), sourcePiece.getPieceName(), sourceR, sourceC, sourcePiece.getRotationString(),
-                targetPiece.getColor(), targetPiece.getPieceName(), targetR, targetC, targetPiece.getRotationString(), impact);
+                targetPiece.getColor(), targetPiece.getPieceName(), targetR, targetC, targetPiece.getRotationString(), Piece.rotationIntToStr(impact));
         System.out.println(debug);
-        
+
+        drawLaser(sourceC * 125 + 60, sourceR * 125 + 60, targetC * 125 + 60, targetR * 125 + 60);
+
         int fireDirection;
         if (((targetPiece.TYPE == PYRAMID || targetPiece.TYPE == SCARAB) && impact == targetPiece.getRotation())) {
             fireDirection = targetPiece.getRight();
@@ -193,17 +214,32 @@ class Board extends javax.swing.JFrame {
             board[targetR][targetC] = null;
             return;
         }
-        fireLazer(targetR, targetC, fireDirection);
+        fireLaser(targetR, targetC, fireDirection);
     }
-    
+
+    private void drawLaser(final int x1, final int y1, final int x2, final int y2) {
+        Graphics g = getContentPane().getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(5));
+
+        g2d.drawLine(x1, y1, x2, y2);
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     private boolean isPieceSelected() {
         return selectedPiece.x >= 0 && selectedPiece.y >= 0;
     }
-    
+
     private Piece getSelectedPiece() {
         return isPieceSelected() ? board[selectedPiece.x][selectedPiece.y] : null;
     }
-    
+
     private void movePiece(int r, int c) {
         if (r >= 0 && r <= 7 && c >= 0 && c <= 9 //Check in bounds
                 && (board[r][c] == null || scarabCheck(r, c)) //Check if spot is empty or if the Scarab can switch
@@ -221,7 +257,7 @@ class Board extends javax.swing.JFrame {
             switchTurn();
         }
     }
-    
+
     private boolean scarabCheck(int r, int c) {
         return board[r][c] == null || (getSelectedPiece().TYPE == SCARAB && (board[r][c].TYPE == PYRAMID || board[r][c].TYPE == ANUBIS));
     }
@@ -237,7 +273,7 @@ class Board extends javax.swing.JFrame {
         int x = selectedPiece.x;
         int y = selectedPiece.y;
         boolean red = board[x][y].isRed();
-        
+
         if (!red && c == 0) {
             return false;
         } else if (red && c == 9) {
@@ -251,19 +287,19 @@ class Board extends javax.swing.JFrame {
         } else if (!red && r == 7 && c == 8) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     private void redraw() {
         paintComponent(getContentPane().getGraphics());
     }
-    
+
     private AffineTransform rotate(Image source, int x, int y, int newDirection) {
         AffineTransform transform = new AffineTransform();
         transform.scale(.25, .25);
         transform.translate(x * 4, y * 4);
-        
+
         double theta = 0.0;
         switch (newDirection) {
             case NORTH:
@@ -277,7 +313,7 @@ class Board extends javax.swing.JFrame {
                 break;
         }
         transform.rotate(theta, source.getWidth(null) / 2, source.getHeight(null) / 2);
-        
+
         return transform;
     }
 
@@ -285,7 +321,7 @@ class Board extends javax.swing.JFrame {
     void setBoard(Piece[][] board) {
         this.board = board;
     }
-    
+
     void returnToMainMenu() {
         new MainMenu().setVisible(true);
         dispose();
@@ -355,7 +391,7 @@ class Board extends javax.swing.JFrame {
         }
         redraw();
     }//GEN-LAST:event_formMouseReleased
-    
+
     private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
         if (evt.getKeyCode() == VK_ESCAPE) {
             returnToMainMenu();
@@ -412,7 +448,7 @@ class Board extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_formKeyReleased
-    
+
     private void formWindowGainedFocus(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowGainedFocus
         redraw();
     }//GEN-LAST:event_formWindowGainedFocus
