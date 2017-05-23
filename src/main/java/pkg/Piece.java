@@ -75,6 +75,10 @@ class Piece {
     }
 
     String getRotationString() {
+        return rotationIntToStr(rotation);
+    }
+
+    static String rotationIntToStr(int rotation) {
         switch (rotation) {
             case NORTH:
                 return "North";
