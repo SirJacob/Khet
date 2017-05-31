@@ -1,4 +1,4 @@
-package pkg;
+package io.github.sirjacob.khet;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;

@@ -1,4 +1,4 @@
-package pkg;
+package io.github.sirjacob.khet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;

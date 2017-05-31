@@ -1,19 +1,17 @@
-package pkg;
+package io.github.sirjacob.khet;
 
 //<editor-fold defaultstate="collapsed" desc="Static Imports from Piece">
-import static pkg.Piece.NORTH;
-import static pkg.Piece.EAST;
-import static pkg.Piece.SOUTH;
-import static pkg.Piece.WEST;
-
-import static pkg.Piece.SILVER;
-import static pkg.Piece.RED;
-
-import static pkg.Piece.PYRAMID;
-import static pkg.Piece.PHARAOH;
-import static pkg.Piece.ANUBIS;
-import static pkg.Piece.SPHINX;
-import static pkg.Piece.SCARAB;
+import static io.github.sirjacob.khet.Piece.NORTH;
+import static io.github.sirjacob.khet.Piece.EAST;
+import static io.github.sirjacob.khet.Piece.SOUTH;
+import static io.github.sirjacob.khet.Piece.WEST;
+import static io.github.sirjacob.khet.Piece.SILVER;
+import static io.github.sirjacob.khet.Piece.RED;
+import static io.github.sirjacob.khet.Piece.PYRAMID;
+import static io.github.sirjacob.khet.Piece.PHARAOH;
+import static io.github.sirjacob.khet.Piece.ANUBIS;
+import static io.github.sirjacob.khet.Piece.SPHINX;
+import static io.github.sirjacob.khet.Piece.SCARAB;
 //</editor-fold>
 import static java.awt.event.KeyEvent.*;
 import java.awt.BasicStroke;
