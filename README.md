@@ -4,3 +4,5 @@ This repository is used to store changes to our year-end programming project. Cr
 
 ### What is Khet?
 For more details see [Khet's Instructions](http://www.khet.com/catalog/view/theme/khet/image/The%20Laser%20Game%20-%20Khet%202.0%20Instructions.pdf).
+
+_Note: X and Y are used interchangeably with R (row) and C (column) throughout the code._
